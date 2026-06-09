@@ -1,5 +1,4 @@
 import pandas as pd
-from openpyxl.workbook.defined_name import DefinedName
 from openpyxl import Workbook
 from openpyxl.chart import BarChart, Reference
 from openpyxl.chart.label import DataLabelList
