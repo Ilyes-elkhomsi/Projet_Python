@@ -1,5 +1,4 @@
 import pandas as pd
-from openpyxl.workbook.defined_name import DefinedName
 from openpyxl import Workbook
 from openpyxl.chart import BarChart, Reference
 from openpyxl.chart.label import DataLabelList
@@ -205,6 +204,99 @@ graphique("Buts marqués par équipe", 3, "G10")
 graphique("Clean sheets par équipe", 4, "A28")
 graphique("xG par équipe", 5, "G28")
 
+# ======================
+# FEUILLE ANALYSE AVANCÉE
+# ======================
+ws_adv = wb.create_sheet("Analyse_avancee")
+
+ws_adv.merge_cells("A1:L1")
+ws_adv["A1"] = "Analyse avancée - Ligue 1"
+ws_adv["A1"].font = title_font
+ws_adv["A1"].alignment = center
+
+ws_adv.merge_cells("A2:L2")
+ws_adv["A2"] = "Analyse complémentaire : efficacité offensive, défense, discipline et domicile/extérieur"
+ws_adv["A2"].font = subtitle_font
+ws_adv["A2"].alignment = center
+
+# Sécurité : création des variables si absentes
+if "efficacite_offensive" not in df.columns:
+    df["efficacite_offensive"] = (df["buts_marques"] / df["xG"]).round(2)
+
+if "indice_discipline" not in df.columns:
+    df["indice_discipline"] = df["cartons_jaunes"] + 3 * df["cartons_rouges"]
+
+# Tables d'analyse
+df_eff = df[["equipe", "efficacite_offensive"]].sort_values("efficacite_offensive", ascending=False)
+df_def = df[["equipe", "buts_encaisses"]].sort_values("buts_encaisses", ascending=True)
+df_disc = df[["equipe", "indice_discipline"]].sort_values("indice_discipline", ascending=False)
+df_home = df[["equipe", "points_domicile", "points_exterieur"]].sort_values("points_domicile", ascending=False)
+
+def write_table(ws, df_table, start_row, start_col):
+    for j, col_name in enumerate(df_table.columns, start=start_col):
+        cell = ws.cell(row=start_row, column=j, value=col_name)
+        cell.fill = blue_fill
+        cell.font = bold_font
+
+    for i, row in enumerate(df_table.itertuples(index=False), start=start_row + 1):
+        for j, value in enumerate(row, start=start_col):
+            ws.cell(row=i, column=j, value=value)
+
+def add_simple_chart(ws, title, start_row, start_col, value_col, position):
+    chart = BarChart()
+    chart.type = "bar"
+    chart.style = 10
+    chart.title = title
+    chart.x_axis.title = title
+    chart.y_axis.title = "Équipes"
+    chart.height = 8
+    chart.width = 13
+    chart.legend = None
+
+    data = Reference(ws, min_col=value_col, min_row=start_row, max_row=start_row + 18)
+    cats = Reference(ws, min_col=start_col, min_row=start_row + 1, max_row=start_row + 18)
+
+    chart.add_data(data, titles_from_data=True)
+    chart.set_categories(cats)
+
+    chart.dataLabels = DataLabelList()
+    chart.dataLabels.showVal = True
+    chart.dataLabels.showCatName = False
+    chart.dataLabels.showSerName = False
+
+    ws.add_chart(chart, position)
+
+# Écriture des tables
+write_table(ws_adv, df_eff, 5, 1)
+write_table(ws_adv, df_def, 5, 5)
+write_table(ws_adv, df_disc, 25, 1)
+write_table(ws_adv, df_home, 25, 5)
+
+# Graphiques analyse avancée
+add_simple_chart(ws_adv, "Efficacité offensive", 5, 1, 2, "A8")
+add_simple_chart(ws_adv, "Buts encaissés", 5, 5, 6, "G8")
+add_simple_chart(ws_adv, "Indice discipline", 25, 1, 2, "A28")
+
+# Graphique domicile / extérieur
+chart_home = BarChart()
+chart_home.type = "bar"
+chart_home.style = 10
+chart_home.title = "Points domicile vs extérieur"
+chart_home.x_axis.title = "Points"
+chart_home.y_axis.title = "Équipes"
+chart_home.height = 8
+chart_home.width = 13
+
+data = Reference(ws_adv, min_col=6, max_col=7, min_row=25, max_row=43)
+cats = Reference(ws_adv, min_col=5, min_row=26, max_row=43)
+
+chart_home.add_data(data, titles_from_data=True)
+chart_home.set_categories(cats)
+
+ws_adv.add_chart(chart_home, "G28")
+
+for col in range(1, 13):
+    ws_adv.column_dimensions[get_column_letter(col)].width = 18
 
 # MISE EN FORME
 for col in range(1, 13):
