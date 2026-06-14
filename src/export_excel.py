@@ -88,7 +88,7 @@ ws_dash["B4"].border = thin_border
 
 
 # ZONE HELPER
-helper_start_row = 45
+helper_start_row = 90
 
 headers = [
     "Equipe",
@@ -267,15 +267,15 @@ def add_simple_chart(ws, title, start_row, start_col, value_col, position):
     ws.add_chart(chart, position)
 
 # Écriture des tables
-write_table(ws_adv, df_eff, 5, 1)
-write_table(ws_adv, df_def, 5, 5)
-write_table(ws_adv, df_disc, 25, 1)
-write_table(ws_adv, df_home, 25, 5)
+write_table(ws_adv, df_eff, 60, 1)
+write_table(ws_adv, df_def, 60,5)
+write_table(ws_adv, df_disc, 85,1)
+write_table(ws_adv, df_home,85,5)
 
 # Graphiques analyse avancée
-add_simple_chart(ws_adv, "Efficacité offensive", 5, 1, 2, "A8")
-add_simple_chart(ws_adv, "Buts encaissés", 5, 5, 6, "G8")
-add_simple_chart(ws_adv, "Indice discipline", 25, 1, 2, "A28")
+add_simple_chart(ws_adv, "Efficacité offensive", 60,1, 2, "A8")
+add_simple_chart(ws_adv, "Buts encaissés",60, 5, 6, "G8")
+add_simple_chart(ws_adv, "Indice discipline", 85,1,2,"A28")
 
 # Graphique domicile / extérieur
 chart_home = BarChart()
@@ -287,13 +287,14 @@ chart_home.y_axis.title = "Équipes"
 chart_home.height = 8
 chart_home.width = 13
 
-data = Reference(ws_adv, min_col=6, max_col=7, min_row=25, max_row=43)
-cats = Reference(ws_adv, min_col=5, min_row=26, max_row=43)
+data = Reference(ws_adv, min_col=6, max_col=7, min_row=85, max_row=103)
+cats = Reference(ws_adv, min_col=5, min_row=86, max_row=103)
+
+ws_adv.add_chart(chart_home, "G25")
 
 chart_home.add_data(data, titles_from_data=True)
 chart_home.set_categories(cats)
 
-ws_adv.add_chart(chart_home, "G28")
 
 for col in range(1, 13):
     ws_adv.column_dimensions[get_column_letter(col)].width = 18
