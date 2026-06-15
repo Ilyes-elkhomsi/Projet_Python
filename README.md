@@ -66,7 +66,6 @@ Projet_Python/
 ├── src/
 │   └── projet_python/
 │       ├── __init__.py
-│       ├── analysis.py
 │       ├── data_cleaning.py
 │       └── export_excel.py
 │
